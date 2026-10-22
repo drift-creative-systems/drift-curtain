@@ -1,0 +1,119 @@
+/*
+ * Drift: Curtain settings screen.
+ * Accent: red #ef4444 for the mark; #dc2626 for text, fills and focus (AA on white).
+ */
+
+.drift-curtain {
+	--drift-curtain-accent: #ef4444;
+	--drift-curtain-accent-strong: #dc2626;
+	--drift-curtain-accent-hover: #b91c1c;
+	--drift-curtain-border: #dcdcde;
+	max-width: 960px;
+}
+
+.drift-curtain__title {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px;
+}
+
+.drift-curtain__mark {
+	display: inline-flex;
+	color: var(--drift-curtain-accent);
+}
+
+.drift-curtain__status {
+	padding: 3px 10px;
+	border-radius: 999px;
+	background: #edfaef;
+	color: #00670f;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.drift-curtain__status--on {
+	background: #fef2f2;
+	color: var(--drift-curtain-accent-hover);
+}
+
+.drift-curtain .nav-tab-wrapper {
+	margin-bottom: 0;
+}
+
+.drift-curtain .nav-tab-active,
+.drift-curtain .nav-tab-active:hover,
+.drift-curtain .nav-tab-active:focus {
+	border-bottom-color: #f0f0f1;
+	box-shadow: inset 0 3px 0 var(--drift-curtain-accent);
+}
+
+.drift-curtain__card {
+	margin-top: 16px;
+	padding: 4px 20px 12px;
+	background: #fff;
+	border: 1px solid var(--drift-curtain-border);
+	border-radius: 8px;
+}
+
+.drift-curtain__card-title {
+	margin: 16px 0 0;
+	padding-left: 12px;
+	border-left: 3px solid var(--drift-curtain-accent);
+	font-size: 1.15em;
+}
+
+.drift-curtain__media {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.drift-curtain__media-preview {
+	display: block;
+	max-width: 150px;
+	height: auto;
+	margin-top: 8px;
+	border: 1px solid var(--drift-curtain-border);
+	border-radius: 6px;
+}
+
+/* wp-admin's .button display rule beats the browser's [hidden] rule. */
+.drift-curtain [hidden] {
+	display: none !important;
+}
+
+.drift-curtain input[type="color"] {
+	width: 64px;
+	height: 36px;
+	padding: 2px;
+}
+
+.drift-curtain__warning {
+	color: var(--drift-curtain-accent-hover);
+}
+
+.drift-curtain input:focus,
+.drift-curtain textarea:focus {
+	border-color: var(--drift-curtain-accent-strong);
+	box-shadow: 0 0 0 1px var(--drift-curtain-accent-strong);
+}
+
+.drift-curtain .button-primary {
+	background: var(--drift-curtain-accent-strong);
+	border-color: var(--drift-curtain-accent-strong);
+}
+
+.drift-curtain .button-primary:hover,
+.drift-curtain .button-primary:focus {
+	background: var(--drift-curtain-accent-hover);
+	border-color: var(--drift-curtain-accent-hover);
+}
+
+@media (max-width: 782px) {
+	.drift-curtain__card {
+		padding: 4px 12px 12px;
+	}
+}

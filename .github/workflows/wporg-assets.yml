@@ -1,0 +1,27 @@
+# Pushes readme.txt and .wordpress-org/ (icons, banners, screenshots) to the
+# WordPress.org SVN repo without a new release, e.g. after bumping
+# "Tested up to". Only runs once WPORG_DEPLOY is "true" (see release.yml).
+name: WordPress.org readme and assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - readme.txt
+      - .wordpress-org/**
+
+jobs:
+  assets:
+    if: vars.WPORG_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update readme and assets
+        uses: 10up/action-wordpress-plugin-asset-update@2.2.0
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: drift-curtain
+          ASSETS_DIR: .wordpress-org
+          IGNORE_OTHER_FILES: true

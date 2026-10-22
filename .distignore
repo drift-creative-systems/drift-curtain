@@ -1,0 +1,14 @@
+# Files left out of the WordPress.org release and the GitHub release zip.
+/.git
+/.github
+/.vscode
+/.wordpress-org
+/build
+.gitignore
+.gitattributes
+.distignore
+phpcs.xml.dist
+README.md
+CHANGELOG.md
+CLAUDE.md
+MEMORY.md

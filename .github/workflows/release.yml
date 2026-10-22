@@ -1,0 +1,62 @@
+# On each published GitHub release: checks the version numbers agree, builds
+# drift-curtain.zip from .distignore and attaches it to the release.
+# Once the plugin is approved on WordPress.org, set the repo variable
+# WPORG_DEPLOY to "true" and add the SVN_USERNAME / SVN_PASSWORD secrets, and
+# the same release is also deployed to the plugin directory.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  SLUG: drift-curtain
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches plugin version
+        run: |
+          header=$(grep -m1 -E '^\s*\*\s*Version:' "$SLUG.php" | awk '{print $NF}')
+          constant=$(sed -nE "s/.*define\( 'DRIFT_CURTAIN_VERSION', '([^']+)'.*/\1/p" "$SLUG.php" | head -1)
+          stable=$(grep -m1 -E '^Stable tag:' readme.txt | awk '{print $NF}')
+          tag="${TAG#v}"
+          echo "Tag: $tag  Header: $header  Constant: $constant  Stable tag: $stable"
+          if [ "$tag" != "$header" ] || [ "$tag" != "$constant" ] || [ "$tag" != "$stable" ]; then
+            echo "::error::Release tag ($tag) must match the Version header, DRIFT_CURTAIN_VERSION and the readme.txt Stable tag."
+            exit 1
+          fi
+
+      - name: Build zip
+        run: |
+          mkdir -p "build/$SLUG"
+          rsync -a ./ "build/$SLUG/" --exclude-from=.distignore
+          cd build && zip -rq "$SLUG.zip" "$SLUG"
+
+      - name: Attach zip to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "build/$SLUG.zip" --clobber
+
+  wporg:
+    needs: zip
+    if: vars.WPORG_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to WordPress.org
+        uses: 10up/action-wordpress-plugin-deploy@2.3.0
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ${{ env.SLUG }}
+          ASSETS_DIR: .wordpress-org

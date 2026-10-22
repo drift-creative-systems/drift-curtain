@@ -1,0 +1,24 @@
+{
+	"editor.insertSpaces": false,
+	"editor.detectIndentation": false,
+	"files.eol": "\n",
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true,
+	"[markdown]": {
+		"files.trimTrailingWhitespace": false
+	},
+	"phpsab.standard": "phpcs.xml.dist",
+	"phpsab.snifferShowSources": true,
+	"intelephense.stubs": [
+		"Core",
+		"date",
+		"json",
+		"pcre",
+		"standard",
+		"wordpress"
+	],
+	"search.exclude": {
+		"**/build": true,
+		"**/vendor": true
+	}
+}
