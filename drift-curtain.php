@@ -3,7 +3,7 @@
  * Plugin Name:       Drift: Curtain
  * Plugin URI:        https://driftcreativesystems.co.uk/
  * Description:       Show visitors a customisable maintenance page with a proper 503 status while you keep working. Scheduling, client preview links, an IP allowlist and an optional site password.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Drift Creative Systems
@@ -11,6 +11,8 @@
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       drift-curtain
+ *
+ * Copyright © 2026 Drift Creative Systems Ltd
  *
  * @package Drift_Curtain
  */
@@ -34,7 +36,7 @@ if ( defined( 'DRIFT_CURTAIN_VERSION' ) ) {
 	return;
 }
 
-define( 'DRIFT_CURTAIN_VERSION', '1.0.0' );
+define( 'DRIFT_CURTAIN_VERSION', '1.0.1' );
 define( 'DRIFT_CURTAIN_FILE', __FILE__ );
 define( 'DRIFT_CURTAIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DRIFT_CURTAIN_URL', plugin_dir_url( __FILE__ ) );
@@ -1294,6 +1296,22 @@ function drift_curtain_add_settings_link( $links ) {
 	array_unshift( $links, $settings_link );
 
 	return $links;
+}
+
+add_filter( 'admin_footer_text', 'drift_curtain_admin_footer_text' );
+
+/**
+ * Shows the copyright and company details in the admin footer, on this plugin's settings screen only.
+ *
+ * @param string $text Footer text.
+ * @return string
+ */
+function drift_curtain_admin_footer_text( $text ) {
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen || 'settings_page_' . DRIFT_CURTAIN_PAGE_SLUG !== $screen->id ) {
+		return $text;
+	}
+	return 'Copyright &copy; ' . esc_html( wp_date( 'Y' ) ) . ' Drift Creative Systems Ltd &middot; Registered in England and Wales, company number 17548220. Registered office: 167-169 Great Portland Street, 5th Floor, London W1W 5PF';
 }
 
 add_action( 'admin_enqueue_scripts', 'drift_curtain_admin_assets' );
