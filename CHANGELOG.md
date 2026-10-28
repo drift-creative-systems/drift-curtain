@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-10-28
+
+### Added
+- Copyright and company details (Drift Creative Systems Ltd, company number, registered office) in the admin footer on Settings → Drift: Curtain, the README, readme.txt and the main file header.
+
 ## [1.0.0] - 2026-10-22
 
 First release as **Drift: Curtain**, a free WordPress.org plugin by Drift Creative Systems. Based on Bonsai Digital Maintenance Mode 1.22, which carries on separately for Bonsai client sites. There is no data migration between the two.

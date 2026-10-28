@@ -4,7 +4,7 @@ Tags: maintenance mode, coming soon, under construction, maintenance, 503
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,6 +54,12 @@ Anything you add in the "Embed code / HTML" field, such as a sign-up form or vid
 
 Source code, issues and pull requests: [github.com/drift-creative-systems/drift-curtain](https://github.com/drift-creative-systems/drift-curtain).
 
+= Copyright =
+
+Copyright © 2026 Drift Creative Systems Ltd
+
+Drift Creative Systems Ltd. Registered in England and Wales, company number 17548220. Registered office: 167-169 Great Portland Street, 5th Floor, London W1W 5PF
+
 == Installation ==
 
 1. In your WordPress admin, go to Plugins → Add New, search for "Drift: Curtain", then install and activate it.
@@ -95,10 +101,16 @@ Yes. The REST API, AJAX, cron, feeds, WP-CLI and wp-admin aren't blocked.
 
 == Changelog ==
 
+= 1.0.1 =
+* Copyright and company details on the settings screen footer and in the readme.
+
 = 1.0.0 =
 * First public release.
 
 == Upgrade Notice ==
+
+= 1.0.1 =
+Adds copyright and company details. No changes to how the plugin works.
 
 = 1.0.0 =
 First public release.

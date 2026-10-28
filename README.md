@@ -81,3 +81,7 @@ WordPress.org assets (icon, banners, screenshots) live in `.wordpress-org/`.
 ## Licence
 
 GPL-2.0-or-later. See [LICENSE](LICENSE).
+
+Copyright © 2026 Drift Creative Systems Ltd
+
+Drift Creative Systems Ltd. Registered in England and Wales, company number 17548220. Registered office: 167-169 Great Portland Street, 5th Floor, London W1W 5PF
