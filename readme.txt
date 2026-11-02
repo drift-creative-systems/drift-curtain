@@ -24,6 +24,7 @@ Features:
 * **IP allowlist.** Your office or a developer's IP always sees the live site.
 * **Site password.** Visitors click "Have a password?" on the maintenance page and enter a shared password. It is stored hashed, failed attempts are throttled, and you choose how long access lasts.
 * **Design.** Logo and background image from the media library, background and text colours, badge, heading, formatted content, embed code, social links and footer text.
+* **Redirect.** Send visitors to another website while maintenance mode is on, with a list of paths (such as a custom login page) that stay reachable.
 * **Background-only mode.** Hide all the text and show just a full-page image or colour.
 * **SEO.** Custom page title and meta description.
 * **WordPress update screen (optional).** Show your page instead of WordPress's plain "Briefly unavailable for scheduled maintenance" message while updates install.
@@ -48,6 +49,7 @@ Anything you add in the "Embed code / HTML" field, such as a sign-up form or vid
 * `drift_curtain_is_active` (filter): whether maintenance mode is on.
 * `drift_curtain_bypass_capability` (filter): the capability that sees the live site. Default `manage_options`.
 * `drift_curtain_can_bypass` (filter): return `true` to let the current visitor through, for example on certain URLs.
+* `drift_curtain_redirect_url` (filter): where visitors are redirected while maintenance mode is on. Return `''` to show the maintenance page.
 * `drift_curtain_retry_after` (filter): the `Retry-After` value in seconds.
 * `drift_curtain_page_html` (filter): the full maintenance page HTML.
 * `drift_curtain_settings_after_fields` (action): add fields to a settings tab.
@@ -90,6 +92,10 @@ Yes. The page sends no-cache headers. If a visitor is shown a cached copy of a p
 = What does "Also show this page while WordPress installs updates" do? =
 
 While WordPress installs updates, it shows a plain "Briefly unavailable for scheduled maintenance" message. With this option ticked, Drift: Curtain adds two files to `wp-content`: a `maintenance.php` drop-in and `drift-curtain.html`, a static copy of your page. Visitors then see your page during updates as well. Both files are removed when you untick the option, deactivate the plugin or delete it. The plugin never replaces a `maintenance.php` it didn't add. Not available on multisite.
+
+= Can I send visitors to another website instead? =
+
+Yes. On the Status tab, tick "Redirect visitors" and enter the address. It only applies while maintenance mode is on, and uses a temporary (302) redirect so nothing is cached once you turn it off. wp-login.php and wp-admin are never redirected. If your login page is somewhere else, add its path (for example `/my-login`) under "Don't redirect". Visitors never see the password form while the redirect is on, so use the IP allowlist or a preview link to let people in.
 
 = Why can't I edit the embed code? =
 

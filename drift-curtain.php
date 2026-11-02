@@ -88,6 +88,9 @@ function drift_curtain_defaults() {
 		'schedule_enabled'        => 0,
 		'schedule_start'          => '',
 		'schedule_end'            => '',
+		'redirect_enabled'        => 0,
+		'redirect_url'            => '',
+		'redirect_exclusions'     => '',
 		'preview_token'           => '',
 		'ip_allowlist'            => '',
 		'site_password'           => '',
@@ -187,6 +190,16 @@ function drift_curtain_maybe_show_page() {
 		return;
 	}
 
+	// With the redirect on, visitors go to the other site instead of seeing the page.
+	$redirect_url = drift_curtain_get_redirect_url();
+	if ( '' !== $redirect_url ) {
+		if ( drift_curtain_is_redirect_excluded( $redirect_url ) ) {
+			return;
+		}
+
+		drift_curtain_redirect( $redirect_url );
+	}
+
 	// Redirects and exits on a correct password; otherwise returns an error message (or '').
 	$password_error = drift_curtain_handle_password_submission();
 
@@ -272,6 +285,106 @@ function drift_curtain_get_retry_after() {
 	 * @param int $seconds Seconds until crawlers should try again.
 	 */
 	return absint( apply_filters( 'drift_curtain_retry_after', $seconds ) );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Redirect
+|--------------------------------------------------------------------------
+*/
+
+/**
+ * The URL to send visitors to instead of showing the maintenance page.
+ *
+ * @return string Redirect URL, or '' if the redirect is off or has no valid URL.
+ */
+function drift_curtain_get_redirect_url() {
+	$url = drift_curtain_option( 'redirect_enabled' ) ? (string) drift_curtain_option( 'redirect_url' ) : '';
+
+	/**
+	 * Filters the URL visitors are redirected to while maintenance mode is on.
+	 * Return '' to show the maintenance page instead.
+	 *
+	 * @param string $url Redirect URL, or '' if the redirect is off.
+	 */
+	$url = (string) apply_filters( 'drift_curtain_redirect_url', $url );
+
+	return '' === $url ? '' : esc_url_raw( $url, array( 'http', 'https' ) );
+}
+
+/**
+ * Normalises a path for comparison: lowercase, leading slash, no trailing
+ * slash, relative to the site's home path (so subdirectory installs work).
+ *
+ * @param string $path URL path.
+ * @return string Normalised path, '/' for the home page.
+ */
+function drift_curtain_normalize_path( $path ) {
+	$path      = '/' . trim( strtolower( rawurldecode( (string) $path ) ), '/' );
+	$home_path = '/' . trim( strtolower( (string) wp_parse_url( home_url(), PHP_URL_PATH ) ), '/' );
+
+	if ( '/' !== $home_path && ( $path === $home_path || 0 === strpos( $path, $home_path . '/' ) ) ) {
+		$path = '/' . ltrim( (string) substr( $path, strlen( $home_path ) ), '/' );
+	}
+
+	return $path;
+}
+
+/**
+ * Whether the current request is on a path that is never redirected: one of
+ * the excluded paths, or the redirect target itself if it is on this site
+ * (which would otherwise loop).
+ *
+ * @param string $redirect_url Redirect URL.
+ * @return bool
+ */
+function drift_curtain_is_redirect_excluded( $redirect_url ) {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+	$request     = drift_curtain_normalize_path( (string) wp_parse_url( $request_uri, PHP_URL_PATH ) );
+
+	$target_host = wp_parse_url( $redirect_url, PHP_URL_HOST );
+	if ( $target_host && strtolower( $target_host ) === strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) ) {
+		if ( drift_curtain_normalize_path( (string) wp_parse_url( $redirect_url, PHP_URL_PATH ) ) === $request ) {
+			return true;
+		}
+	}
+
+	$excluded = preg_split( '/\s+/', (string) drift_curtain_option( 'redirect_exclusions' ), -1, PREG_SPLIT_NO_EMPTY );
+	foreach ( $excluded as $path ) {
+		$path = drift_curtain_normalize_path( $path );
+
+		// "/" means the home page only; any other path also covers the pages below it.
+		if ( $path === $request || ( '/' !== $path && 0 === strpos( $request, $path . '/' ) ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Sends a temporary (302) redirect to the given URL and exits.
+ *
+ * @param string $url Redirect URL, set by an administrator.
+ * @return void
+ */
+function drift_curtain_redirect( $url ) {
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+
+	// The target is chosen by an administrator, so allow its host for wp_safe_redirect().
+	if ( $host ) {
+		add_filter(
+			'allowed_redirect_hosts',
+			function ( $hosts ) use ( $host ) {
+				$hosts[] = $host;
+				return $hosts;
+			}
+		);
+	}
+
+	nocache_headers();
+	wp_safe_redirect( $url, 302 );
+	exit;
 }
 
 /**
@@ -811,6 +924,33 @@ function drift_curtain_settings_schema() {
 							'type'        => 'datetime',
 							'description' => __( 'Leave blank to turn it off yourself. Also sets the Retry-After header for search engines.', 'drift-curtain' ),
 							'sanitize'    => 'drift_curtain_sanitize_datetime',
+						),
+					),
+				),
+				'redirect' => array(
+					'title'  => __( 'Redirect', 'drift-curtain' ),
+					'fields' => array(
+						'redirect_enabled'    => array(
+							'label'       => __( 'Redirect visitors', 'drift-curtain' ),
+							'type'        => 'checkbox',
+							'text'        => __( 'Send visitors to another website instead of showing the maintenance page', 'drift-curtain' ),
+							'description' => __( 'Only while maintenance mode is on. Uses a temporary (302) redirect. Administrators, the IP allowlist and preview links still see this site. The site password can\'t be used, as visitors never see the password form.', 'drift-curtain' ),
+							'sanitize'    => 'drift_curtain_sanitize_checkbox',
+						),
+						'redirect_url'        => array(
+							'label'       => __( 'Redirect to', 'drift-curtain' ),
+							'type'        => 'url',
+							'placeholder' => 'https://',
+							'description' => __( 'The full web address to send visitors to. If it is blank, visitors see the maintenance page.', 'drift-curtain' ),
+							'sanitize'    => 'drift_curtain_sanitize_redirect_url',
+						),
+						'redirect_exclusions' => array(
+							'label'       => __( 'Don\'t redirect', 'drift-curtain' ),
+							'type'        => 'textarea',
+							'rows'        => 4,
+							'placeholder' => '/my-login',
+							'description' => __( 'Paths on this site that still load normally while the redirect is on, one per line, such as a custom login page. Each path also covers the pages below it; "/" means the home page only. wp-login.php and wp-admin are never redirected.', 'drift-curtain' ),
+							'sanitize'    => 'drift_curtain_sanitize_path_list',
 						),
 					),
 				),
@@ -1390,7 +1530,9 @@ function drift_curtain_render_settings_page() {
 		<h1 class="drift-curtain__title">
 			<span class="drift-curtain__mark"><?php echo drift_curtain_mark_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Fixed markup, attributes escaped in drift_curtain_mark_svg(). ?></span>
 			<?php echo esc_html( get_admin_page_title() ); ?>
-			<?php if ( $active ) : ?>
+			<?php if ( $active && '' !== drift_curtain_get_redirect_url() ) : ?>
+				<span class="drift-curtain__status drift-curtain__status--on"><?php esc_html_e( 'Redirecting visitors', 'drift-curtain' ); ?></span>
+			<?php elseif ( $active ) : ?>
 				<span class="drift-curtain__status drift-curtain__status--on"><?php esc_html_e( 'Maintenance mode is on', 'drift-curtain' ); ?></span>
 			<?php else : ?>
 				<span class="drift-curtain__status"><?php esc_html_e( 'Site is live', 'drift-curtain' ); ?></span>
@@ -1639,6 +1781,39 @@ function drift_curtain_sanitize_ip_list( $value ) {
 	);
 
 	return implode( ', ', $valid );
+}
+
+/**
+ * Sanitises the redirect URL, keeping only absolute http(s) addresses.
+ *
+ * @param mixed $value Raw input.
+ * @return string
+ */
+function drift_curtain_sanitize_redirect_url( $value ) {
+	$url = is_string( $value ) ? esc_url_raw( trim( $value ), array( 'http', 'https' ) ) : '';
+
+	return wp_parse_url( $url, PHP_URL_HOST ) ? $url : '';
+}
+
+/**
+ * Sanitises a newline separated list of paths. Full URLs are cut down to
+ * their path, and query strings and fragments are dropped.
+ *
+ * @param mixed $value Raw input.
+ * @return string One path per line.
+ */
+function drift_curtain_sanitize_path_list( $value ) {
+	$value = is_string( $value ) ? $value : '';
+	$paths = array();
+
+	foreach ( preg_split( '/\s+/', $value, -1, PREG_SPLIT_NO_EMPTY ) as $line ) {
+		$path = wp_parse_url( sanitize_text_field( $line ), PHP_URL_PATH );
+		if ( is_string( $path ) && '' !== $path ) {
+			$paths[] = drift_curtain_normalize_path( $path );
+		}
+	}
+
+	return implode( "\n", array_unique( $paths ) );
 }
 
 /**

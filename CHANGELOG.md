@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Redirect option on the Status tab: while maintenance mode is on, send visitors to another website with a temporary (302) redirect instead of showing the maintenance page. Administrators, the IP allowlist and preview links still see the site.
+- "Don't redirect" paths, one per line, for a custom login page or anything else that must stay reachable. A redirect target on the same site is never redirected, so it can't loop.
+- `drift_curtain_redirect_url` filter.
+
 ## [1.0.1] - 2026-10-28
 
 ### Added
