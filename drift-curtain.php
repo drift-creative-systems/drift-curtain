@@ -3,7 +3,7 @@
  * Plugin Name:       Drift: Curtain
  * Plugin URI:        https://driftcreativesystems.co.uk/
  * Description:       Show visitors a customisable maintenance page with a proper 503 status while you keep working. Scheduling, client preview links, an IP allowlist and an optional site password.
- * Version:           1.0.1
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Drift Creative Systems
@@ -36,7 +36,7 @@ if ( defined( 'DRIFT_CURTAIN_VERSION' ) ) {
 	return;
 }
 
-define( 'DRIFT_CURTAIN_VERSION', '1.0.1' );
+define( 'DRIFT_CURTAIN_VERSION', '1.1.0' );
 define( 'DRIFT_CURTAIN_FILE', __FILE__ );
 define( 'DRIFT_CURTAIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DRIFT_CURTAIN_URL', plugin_dir_url( __FILE__ ) );

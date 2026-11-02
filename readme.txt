@@ -4,7 +4,7 @@ Tags: maintenance mode, coming soon, under construction, maintenance, 503
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,11 @@ Yes. The REST API, AJAX, cron, feeds, WP-CLI and wp-admin aren't blocked.
 
 == Changelog ==
 
+= 1.1.0 =
+* New: send visitors to another website while maintenance mode is on, instead of showing the maintenance page.
+* New: "Don't redirect" paths, for a custom login page or anything else that must stay reachable.
+* New: `drift_curtain_redirect_url` filter.
+
 = 1.0.1 =
 * Copyright and company details on the settings screen footer and in the readme.
 
@@ -114,6 +119,9 @@ Yes. The REST API, AJAX, cron, feeds, WP-CLI and wp-admin aren't blocked.
 * First public release.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Adds an optional redirect to another website while maintenance mode is on. Off by default, so nothing changes until you turn it on.
 
 = 1.0.1 =
 Adds copyright and company details. No changes to how the plugin works.
