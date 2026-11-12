@@ -3,7 +3,7 @@
  * Plugin Name:       Drift: Curtain
  * Plugin URI:        https://driftcreativesystems.co.uk/
  * Description:       Show visitors a customisable maintenance page with a proper 503 status while you keep working. Scheduling, client preview links, an IP allowlist and an optional site password.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Drift Creative Systems
@@ -36,7 +36,7 @@ if ( defined( 'DRIFT_CURTAIN_VERSION' ) ) {
 	return;
 }
 
-define( 'DRIFT_CURTAIN_VERSION', '1.1.0' );
+define( 'DRIFT_CURTAIN_VERSION', '1.2.0' );
 define( 'DRIFT_CURTAIN_FILE', __FILE__ );
 define( 'DRIFT_CURTAIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DRIFT_CURTAIN_URL', plugin_dir_url( __FILE__ ) );
@@ -96,9 +96,14 @@ function drift_curtain_defaults() {
 		'site_password'           => '',
 		'password_days'           => 7,
 		'logo'                    => '',
+		'logo_centre'             => 0,
 		'background_image'        => '',
 		'bg_colour'               => '#ffffff',
 		'font_colour'             => '#111111',
+		'article_bg_colour'       => '#ffffff',
+		'article_bg_opacity'      => 85,
+		'badge_bg_colour'         => '',
+		'badge_font_colour'       => '',
 		'badge_text'              => '',
 		'header_text'             => '',
 		'main_content'            => '',
@@ -655,6 +660,11 @@ function drift_curtain_render_page( $args = array() ) {
 	$bg_image     = (string) drift_curtain_option( 'background_image' );
 	$bg_colour    = sanitize_hex_color( drift_curtain_option( 'bg_colour' ) );
 	$font_colour  = sanitize_hex_color( drift_curtain_option( 'font_colour' ) );
+	$article_bg   = sanitize_hex_color( drift_curtain_option( 'article_bg_colour' ) );
+	$article_op   = drift_curtain_sanitize_percent( drift_curtain_option( 'article_bg_opacity' ) );
+	$badge_bg     = sanitize_hex_color( drift_curtain_option( 'badge_bg_colour' ) );
+	$badge_colour = sanitize_hex_color( drift_curtain_option( 'badge_font_colour' ) );
+	$logo_centre  = (int) drift_curtain_option( 'logo_centre' );
 	$badge_text   = trim( (string) drift_curtain_option( 'badge_text' ) );
 	$header       = trim( (string) drift_curtain_option( 'header_text' ) );
 	$main_safe    = wp_kses_post( (string) drift_curtain_option( 'main_content' ) );
@@ -669,6 +679,16 @@ function drift_curtain_render_page( $args = array() ) {
 	}
 	if ( ! $font_colour ) {
 		$font_colour = '#111111';
+	}
+	if ( ! $article_bg ) {
+		$article_bg = '#ffffff';
+	}
+	// Blank badge colours keep the original look: text colour on background colour.
+	if ( ! $badge_bg ) {
+		$badge_bg = $font_colour;
+	}
+	if ( ! $badge_colour ) {
+		$badge_colour = $bg_colour;
 	}
 	if ( '' === $badge_text ) {
 		$badge_text = __( 'Scheduled maintenance', 'drift-curtain' );
@@ -711,6 +731,9 @@ function drift_curtain_render_page( $args = array() ) {
 		:root {
 			--curtain-bg: <?php echo esc_attr( $bg_colour ); ?>;
 			--curtain-color: <?php echo esc_attr( $font_colour ); ?>;
+			--curtain-article-bg: <?php echo esc_attr( drift_curtain_hex_to_rgba( $article_bg, $article_op ) ); ?>;
+			--curtain-badge-bg: <?php echo esc_attr( $badge_bg ); ?>;
+			--curtain-badge-color: <?php echo esc_attr( $badge_colour ); ?>;
 		}
 		* { box-sizing: border-box; }
 		body {
@@ -737,14 +760,30 @@ function drift_curtain_render_page( $args = array() ) {
 			text-align: left;
 			max-width: 720px;
 			margin: 0 auto;
-			background: rgba(255, 255, 255, .85);
+			background: var(--curtain-article-bg);
 			border-radius: 16px;
 			padding: 28px;
 			box-shadow: 0 6px 24px rgba(0, 0, 0, .06);
 			color: var(--curtain-color);
 		}
 		article p { margin: 0 0 16px; }
+		/* Even spacing under each block from the content editor. */
+		.curtain-main { padding-bottom: 8px; }
+		.curtain-main p,
+		.curtain-main ul,
+		.curtain-main ol,
+		.curtain-main blockquote,
+		.curtain-main h2,
+		.curtain-main h3,
+		.curtain-main h4,
+		.curtain-main h5,
+		.curtain-main h6 { margin: 0 0 16px; padding-bottom: 4px; }
+		.curtain-main ul,
+		.curtain-main ol { padding-left: 1.5em; }
+		.curtain-main li { margin-bottom: 6px; }
+		.curtain-main blockquote { padding-left: 16px; border-left: 3px solid currentColor; }
 		.logo img { max-width: 220px; margin: 0 0 20px; height: auto; }
+		.logo--centre { text-align: center; }
 		.socials { margin-top: 16px; }
 		.socials a { text-decoration: none; color: var(--curtain-color); }
 		.socials a:hover { text-decoration: underline; }
@@ -752,8 +791,8 @@ function drift_curtain_render_page( $args = array() ) {
 		.badge {
 			display: inline-block;
 			padding: 4px 8px;
-			background: var(--curtain-color);
-			color: var(--curtain-bg);
+			background: var(--curtain-badge-bg);
+			color: var(--curtain-badge-color);
 			border-radius: 999px;
 			font-size: 12px;
 			margin-bottom: 16px;
@@ -796,7 +835,7 @@ function drift_curtain_render_page( $args = array() ) {
 	<article>
 
 		<?php if ( '' !== $logo ) : ?>
-		<div class="logo">
+		<div class="<?php echo esc_attr( $logo_centre ? 'logo logo--centre' : 'logo' ); ?>">
 			<img src="<?php echo esc_url( $logo ); ?>" alt="<?php echo esc_attr( $site_name ); ?>">
 		</div>
 		<?php endif; ?>
@@ -1004,6 +1043,12 @@ function drift_curtain_settings_schema() {
 							'type'     => 'media',
 							'sanitize' => 'esc_url_raw',
 						),
+						'logo_centre'      => array(
+							'label'    => __( 'Logo position', 'drift-curtain' ),
+							'type'     => 'checkbox',
+							'text'     => __( 'Centre the logo', 'drift-curtain' ),
+							'sanitize' => 'drift_curtain_sanitize_checkbox',
+						),
 						'background_image' => array(
 							'label'       => __( 'Background image', 'drift-curtain' ),
 							'type'        => 'media',
@@ -1019,7 +1064,46 @@ function drift_curtain_settings_schema() {
 						'font_colour'      => array(
 							'label'       => __( 'Text colour', 'drift-curtain' ),
 							'type'        => 'colour',
-							'description' => __( 'Headings, body text, the badge and social links.', 'drift-curtain' ),
+							'description' => __( 'Headings, body text and social links.', 'drift-curtain' ),
+							'sanitize'    => 'sanitize_hex_color',
+						),
+					),
+				),
+				'article' => array(
+					'title'  => __( 'Content box', 'drift-curtain' ),
+					'fields' => array(
+						'article_bg_colour'  => array(
+							'label'       => __( 'Background colour', 'drift-curtain' ),
+							'type'        => 'colour',
+							'description' => __( 'The box behind the logo, heading and content.', 'drift-curtain' ),
+							'sanitize'    => 'sanitize_hex_color',
+						),
+						'article_bg_opacity' => array(
+							'label'       => __( 'Background opacity', 'drift-curtain' ),
+							'type'        => 'number',
+							'min'         => 0,
+							'max'         => 100,
+							'suffix'      => '%',
+							'description' => __( '100 is solid, 0 is fully see-through.', 'drift-curtain' ),
+							'sanitize'    => 'drift_curtain_sanitize_percent',
+						),
+					),
+				),
+				'badge'   => array(
+					'title'  => __( 'Badge', 'drift-curtain' ),
+					'fields' => array(
+						'badge_bg_colour'   => array(
+							'label'       => __( 'Background colour', 'drift-curtain' ),
+							'type'        => 'colour',
+							'allow_empty' => true,
+							'description' => __( 'Leave blank to use the text colour.', 'drift-curtain' ),
+							'sanitize'    => 'sanitize_hex_color',
+						),
+						'badge_font_colour' => array(
+							'label'       => __( 'Text colour', 'drift-curtain' ),
+							'type'        => 'colour',
+							'allow_empty' => true,
+							'description' => __( 'Leave blank to use the page background colour.', 'drift-curtain' ),
 							'sanitize'    => 'sanitize_hex_color',
 						),
 					),
@@ -1195,23 +1279,29 @@ function drift_curtain_render_field( $field ) {
 			}
 			break;
 
+		case 'colour':
+			// Text input upgraded to the core wp-color-picker (hex entry) by admin.js.
+			$defaults = drift_curtain_defaults();
+			$value    = sanitize_hex_color( $value );
+			if ( ! $value && empty( $field['allow_empty'] ) ) {
+				$value = $defaults[ $field['key'] ];
+			}
+			printf(
+				'<input type="text" name="%1$s" id="%1$s" value="%2$s" class="drift-curtain-colour" data-default-color="%3$s" maxlength="7" spellcheck="false">',
+				esc_attr( $option ),
+				esc_attr( (string) $value ),
+				esc_attr( (string) $defaults[ $field['key'] ] )
+			);
+			break;
+
 		case 'text':
 		case 'url':
 		case 'datetime':
-		case 'colour':
 			$input_types = array(
 				'text'     => 'text',
 				'url'      => 'url',
 				'datetime' => 'datetime-local',
-				'colour'   => 'color',
 			);
-			if ( 'colour' === $field['type'] ) {
-				$value = sanitize_hex_color( $value );
-				if ( ! $value ) {
-					$defaults = drift_curtain_defaults();
-					$value    = $defaults[ $field['key'] ];
-				}
-			}
 			printf(
 				'<input type="%1$s" name="%2$s" id="%2$s" value="%3$s" class="%4$s" placeholder="%5$s">',
 				esc_attr( $input_types[ $field['type'] ] ),
@@ -1468,8 +1558,8 @@ function drift_curtain_admin_assets( $hook_suffix ) {
 	}
 
 	wp_enqueue_media();
-	wp_enqueue_style( 'drift-curtain-admin', DRIFT_CURTAIN_URL . 'assets/admin.css', array(), DRIFT_CURTAIN_VERSION );
-	wp_enqueue_script( 'drift-curtain-admin', DRIFT_CURTAIN_URL . 'assets/admin.js', array( 'jquery' ), DRIFT_CURTAIN_VERSION, true );
+	wp_enqueue_style( 'drift-curtain-admin', DRIFT_CURTAIN_URL . 'assets/admin.css', array( 'wp-color-picker' ), DRIFT_CURTAIN_VERSION );
+	wp_enqueue_script( 'drift-curtain-admin', DRIFT_CURTAIN_URL . 'assets/admin.js', array( 'jquery', 'wp-color-picker' ), DRIFT_CURTAIN_VERSION, true );
 	wp_localize_script(
 		'drift-curtain-admin',
 		'driftCurtainAdmin',
@@ -1872,4 +1962,40 @@ function drift_curtain_sanitize_site_password( $value ) {
  */
 function drift_curtain_sanitize_password_days( $value ) {
 	return min( 365, absint( $value ) );
+}
+
+/**
+ * Sanitises a percentage to a whole number, 0–100.
+ *
+ * @param mixed $value Raw input.
+ * @return int
+ */
+function drift_curtain_sanitize_percent( $value ) {
+	return min( 100, absint( $value ) );
+}
+
+/**
+ * Converts a hex colour and an opacity percentage to a CSS rgba() value.
+ *
+ * @param string $hex     Colour as #rgb or #rrggbb (already sanitised).
+ * @param int    $percent Opacity, 0–100.
+ * @return string
+ */
+function drift_curtain_hex_to_rgba( $hex, $percent ) {
+	$hex = ltrim( (string) $hex, '#' );
+	if ( 3 === strlen( $hex ) ) {
+		$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+	}
+	if ( 6 !== strlen( $hex ) || ! ctype_xdigit( $hex ) ) {
+		$hex = 'ffffff';
+	}
+
+	// %F is locale-independent, so the decimal point is always a dot.
+	return sprintf(
+		'rgba(%d, %d, %d, %.2F)',
+		hexdec( substr( $hex, 0, 2 ) ),
+		hexdec( substr( $hex, 2, 2 ) ),
+		hexdec( substr( $hex, 4, 2 ) ),
+		drift_curtain_sanitize_percent( $percent ) / 100
+	);
 }
