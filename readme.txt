@@ -4,7 +4,7 @@ Tags: maintenance mode, coming soon, under construction, maintenance, 503
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -107,6 +107,13 @@ Yes. The REST API, AJAX, cron, feeds, WP-CLI and wp-admin aren't blocked.
 
 == Changelog ==
 
+= 1.2.0 =
+* New: badge background and text colours.
+* New: option to centre the logo.
+* New: background colour and opacity for the content box.
+* Improved: colour fields use the WordPress colour picker, so you can type or paste hex values.
+* Improved: even spacing under paragraphs, lists, headings and quotes in the main content.
+
 = 1.1.0 =
 * New: send visitors to another website while maintenance mode is on, instead of showing the maintenance page.
 * New: "Don't redirect" paths, for a custom login page or anything else that must stay reachable.
@@ -119,6 +126,9 @@ Yes. The REST API, AJAX, cron, feeds, WP-CLI and wp-admin aren't blocked.
 * First public release.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds badge colours, logo centring and content box colour and opacity. Defaults match the current look, so nothing changes until you edit them.
 
 = 1.1.0 =
 Adds an optional redirect to another website while maintenance mode is on. Off by default, so nothing changes until you turn it on.
