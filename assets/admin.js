@@ -1,11 +1,18 @@
 /**
- * Settings → Drift: Curtain: media pickers and the preview-token generator.
- * Enqueued on that screen only.
+ * Settings → Drift: Curtain: colour pickers, media pickers and the
+ * preview-token generator. Enqueued on that screen only.
  */
 ( function ( $ ) {
 	'use strict';
 
 	var strings = window.driftCurtainAdmin || {};
+
+	// Core colour picker: swatch, hex field, Default and Clear buttons.
+	$( function () {
+		if ( $.fn.wpColorPicker ) {
+			$( '.drift-curtain-colour' ).wpColorPicker();
+		}
+	} );
 
 	$( document ).on( 'click.driftCurtain', '.drift-curtain-media-select', function ( e ) {
 		e.preventDefault();

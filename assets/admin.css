@@ -85,12 +85,6 @@
 	display: none !important;
 }
 
-.drift-curtain input[type="color"] {
-	width: 64px;
-	height: 36px;
-	padding: 2px;
-}
-
 .drift-curtain__warning {
 	color: var(--drift-curtain-accent-hover);
 }

@@ -37,7 +37,7 @@ All options are prefixed `drift_curtain_`. They're stored data, so never rename 
 |---|---|
 | Status | `enabled`, `show_main_content`, `override_wp_maintenance`, `schedule_enabled`, `schedule_start`, `schedule_end` |
 | Preview & access | `preview_token`, `ip_allowlist`, `site_password` (hash), `password_days` |
-| Design | `logo`, `background_image`, `bg_colour`, `font_colour` |
+| Design | `logo`, `logo_centre`, `background_image`, `bg_colour`, `font_colour`, `article_bg_colour`, `article_bg_opacity`, `badge_bg_colour`, `badge_font_colour` |
 | Content & SEO | `badge_text`, `header_text`, `main_content`, `embed_content`, `footer_text`, `linkedin`, `facebook`, `instagram`, `seo_title`, `seo_description` |
 
 `embed_content` is printed unescaped by design (see the note at the top of `drift-curtain.php`). Changing it needs `unfiltered_html`.
