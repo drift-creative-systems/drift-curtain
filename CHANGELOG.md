@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Design tab: "Centre the logo" option.
+- Design tab, Content box card: background colour and opacity for the box behind the logo, heading and content. Defaults (white, 85%) match the previous look.
+- Design tab, Badge card: badge background and text colours. Left blank, the badge keeps using the text colour on the page background colour.
+
+### Changed
+- Colour fields use the WordPress colour picker, so hex values can be typed or pasted in.
+- Even bottom spacing under paragraphs, lists, headings and quotes in the main content.
+
 ## [1.1.0] - 2026-11-02
 
 ### Added

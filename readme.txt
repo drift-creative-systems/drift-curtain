@@ -23,7 +23,7 @@ Features:
 * **Preview link.** Generate a secret link to send to a client. Anyone with it sees the live site for a day, without needing a login.
 * **IP allowlist.** Your office or a developer's IP always sees the live site.
 * **Site password.** Visitors click "Have a password?" on the maintenance page and enter a shared password. It is stored hashed, failed attempts are throttled, and you choose how long access lasts.
-* **Design.** Logo and background image from the media library, background and text colours, badge, heading, formatted content, embed code, social links and footer text.
+* **Design.** Logo (optionally centred) and background image from the media library, background and text colours, content box colour and opacity, badge colours, badge, heading, formatted content, embed code, social links and footer text.
 * **Redirect.** Send visitors to another website while maintenance mode is on, with a list of paths (such as a custom login page) that stay reachable.
 * **Background-only mode.** Hide all the text and show just a full-page image or colour.
 * **SEO.** Custom page title and meta description.
